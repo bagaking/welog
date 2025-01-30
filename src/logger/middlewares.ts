@@ -68,16 +68,16 @@ export class ConsoleMiddleware implements LoggerMiddleware {
     // 根据日志级别使用不同的控制台方法
     switch (record.level) {
       case LogLevel.DEBUG:
-        console.debug(output);
+        console.debug(record.message, output);
         break;
       case LogLevel.INFO:
-        console.info(output);
+        console.info(record.message, output);
         break;
       case LogLevel.WARN:
-        console.warn(output);
+        console.warn(record.message, output);
         break;
       case LogLevel.ERROR:
-        console.error(output);
+        console.error(record.message, output);
         break;
     }
 
