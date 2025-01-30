@@ -1,6 +1,6 @@
 {
   "name": "@bagaking/welog",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A lightweight but full-featured tracing system with context management and integrated logging",
   "type": "module",
   "main": "dist/index.js",
@@ -9,6 +9,7 @@
   "files": [
     "dist",
     "README.md",
+    "ARCH.md",
     "LICENSE"
   ],
   "scripts": {

@@ -57,8 +57,8 @@ export class ContextImpl implements Context {
     });
   }
 
-  forWithParams(options: Partial<Omit<ContextOptions, 'parent'>> = {}): Context {
-    return new ContextImpl({
+  fork(options: Partial<Omit<ContextOptions, 'parent'>> = {}): this {
+    return new (this.constructor as new (...args: any[]) => this)({
       parent: this,
       rootSpanDepth: this._rootSpanDepth + 1,  // 增加根深度
       ...options
@@ -162,7 +162,7 @@ export class ContextImpl implements Context {
     }
   }
 
-  getLogger(): Logger {
+  get logger(): Logger {
     return this._logger;
   }
 }

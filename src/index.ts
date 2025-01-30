@@ -31,7 +31,7 @@ export {
 } from './types';
 
 // Core APIs
-export { newContext } from './context/context';
+export * from './context/context';
 export { createLogger } from './logger';
 
 // Middlewares

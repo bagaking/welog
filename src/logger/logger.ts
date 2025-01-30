@@ -1,7 +1,5 @@
-import type { Logger, LoggerConfig, LogRecord, LoggerMiddleware } from '../types';
-import { LogLevel } from '../types';
-import type { Context } from '../types';
-import type { Span } from '../types';
+import type { Logger, LoggerConfig, LogRecord, LoggerMiddleware, Context, Span } from '../types';
+import { LogLevel } from '../types'; 
 
 export class LoggerImpl implements Logger {
   private readonly middlewares: LoggerMiddleware[];

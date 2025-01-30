@@ -20,7 +20,7 @@ export interface ContextData {
 
 export interface ContextOptions {
   /** 父级 Context */
-  parent?: Context<P>;
+  parent?: Context;
   /** 模块名称 */
   module?: string;
   /** 参数 */
@@ -31,14 +31,14 @@ export interface ContextOptions {
 
 export interface Context {
   /** 获取 Context 数据 */
-  get(): Readonly<ContextData<P>>;
+  get(): Readonly<ContextData>;
   
   /** 
    * 创建新的 Context
    * 建议：在调用子函数时使用 fork 以支持并发追踪
    * @param options - 配置选项，可包含 module 和 params
    */
-  forWithParams(options?: Partial<Omit<ContextOptions<P>, 'parent'>>): Context<P>;
+  fork(options?: Partial<Omit<ContextOptions, 'parent'>>): this;
 
   /**
    * 开始新的 Span，自动将当前 head 作为父级
@@ -66,10 +66,15 @@ export interface Context {
    */
   getGlobalSpanTree(): SpanNode;
 
+
+
+  /** 获取 Context 参数 */
+  get params(): Record<string, any>;
+
   /**
    * 获取 Logger 实例
    */
-  getLogger(): Logger;
+  get logger(): Logger;
 }
 
 // Span Types
@@ -106,7 +111,7 @@ export interface SpanData {
 
 export interface SpanOptions {
   /** 关联的 Context */
-  context: Context<any>;
+  context: Context;
   /** 父 Span */
   parent?: Span;
   /** 操作名称 */
