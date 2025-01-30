@@ -73,10 +73,19 @@ export class ContextImpl implements Context {
   }
 
   fork(options: Partial<Omit<ContextOptions, 'parent'>> = {}): this {
+    const optionsWithoutParams = {
+      ...options,
+      params: undefined
+    };
+
     return new (this.constructor as new (...args: any[]) => this)({
       parent: this,
       rootSpanDepth: this._rootSpanDepth + 1,  // 增加根深度
-      ...options
+      ...optionsWithoutParams,
+      params: {
+        ...this._data.params,
+        ...options.params
+      }
     });
   }
 
