@@ -27,6 +27,8 @@ export interface ContextOptions {
   params?: Record<string, any>;
   /** Context 的根 Span 深度 */
   rootSpanDepth?: number;
+
+  logger?: LoggerConfig;
 }
 
 export interface Context {

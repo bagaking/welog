@@ -2,6 +2,8 @@ import type { Context, ContextData, ContextOptions, Logger, Span, SpanNode } fro
 import { createContextData } from './utils';
 import { createSpan } from './span';
 import { createLogger } from '../logger/logger';
+import { ConsoleMiddleware } from '../logger/middlewares';
+import { SpanLogMiddleware } from '../logger/middlewares';
 
 
 /**
@@ -41,7 +43,20 @@ export class ContextImpl implements Context {
       options.parent._children.add(this);
     }
 
-    this._logger = createLogger({}, this);
+    this._logger = createLogger(options.logger || {
+      middlewares: [
+        new SpanLogMiddleware({ samplingRate: 1 }),
+        new ConsoleMiddleware({ 
+          includeContext: true, 
+          includeSpan: true,
+          fieldSelector: (record) => ({
+            module: record.context?.get().module,
+            operation: record.span?.get().name,
+            ...record.data
+          })
+        })
+      ]
+    }, this);
   }
 
   get(): Readonly<ContextData> {
