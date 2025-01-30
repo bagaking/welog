@@ -11,12 +11,11 @@ export interface CreateSpanOptions extends SpanOptions {
  * 创建 Span 数据
  */
 export function createSpanData(options: CreateSpanOptions): SpanData {
-  const { context, parent, name, attributes = {}, depth } = options;
-  const contextData = context.get();
+  const { traceId, parent, name, attributes = {}, depth } = options;
 
   return {
     id: generateId(),
-    traceId: contextData.traceId,
+    traceId,
     parentId: parent?.get().id,
     name,
     startTime: Date.now(),

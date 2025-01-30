@@ -110,8 +110,8 @@ export interface SpanData {
 }
 
 export interface SpanOptions {
-  /** 关联的 Context */
-  context: Context;
+  /** 关联的 TraceID (避免循环依赖 Context) */
+  traceId: string;
   /** 父 Span */
   parent?: Span;
   /** 操作名称 */

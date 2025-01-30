@@ -20,7 +20,7 @@ export class ContextImpl implements Context {
     
     // 创建哨兵 span，使用 rootSpanDepth
     const sentinel = createSpan({
-      context: this,
+      traceId: baseData.traceId,
       name: options.module ? `${options.module}-sentinel` : 'root-sentinel',
       attributes: { isSentinel: true },
       depth: this._rootSpanDepth
@@ -65,15 +65,16 @@ export class ContextImpl implements Context {
     });
   }
 
+  
   startSpan(name: string, attributes: Record<string, unknown> = {}): Span {
     const span = createSpan({
-      context: this,
+      traceId: this._data.traceId,
       parent: this._data.headSpan,
       name,
       attributes,
       depth: this._rootSpanDepth + 1  // 在根深度基础上加1
     });
-    
+     
     this._data.spans.set(span.get().id, span);
     this._data.headSpan = span;
     return span;
