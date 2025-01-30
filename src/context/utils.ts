@@ -11,7 +11,10 @@ export function generateId(): string {
 /**
  * 生成完整模块路径
  */
-export function getFullModulePath(parent: Context | undefined, module: string | undefined): string {
+export function getFullModulePath(
+  parent: Context | undefined,
+  module: string | undefined
+): string {
   if (!module) {
     return parent?.get().module || '';
   }
@@ -23,12 +26,14 @@ export function getFullModulePath(parent: Context | undefined, module: string | 
 /**
  * 创建初始 Context 数据
  */
-export function createContextData(options: {
-  parent?: Context;
-  module?: string;
-  params?: Record<string, unknown>;
-}): Omit<ContextData, 'spans' | 'headSpan'> {
-  const { parent, module, params = {} } = options;
+export function createContextData(
+  options: {
+    parent?: Context;
+    module?: string;
+    params?: Record<string, any>;
+  }
+): Omit<ContextData, 'spans' | 'headSpan'> {
+  const { parent, module, params = {}} = options;
   
   return {
     traceId: parent?.get().traceId ?? generateId(),
@@ -36,6 +41,6 @@ export function createContextData(options: {
     id: generateId(),
     createdAt: Date.now(),
     module: getFullModulePath(parent, module),
-    params: { ...params }
+    params
   };
 } 

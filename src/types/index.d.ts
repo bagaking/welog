@@ -11,7 +11,7 @@ export interface ContextData {
   /** 模块路径 */
   module?: string;
   /** 自定义参数 */
-  params: Record<string, unknown>;
+  params: Record<string, any>;
   /** Span Map */
   spans: Map<string, Span>;
   /** 当前活跃的 Span */
@@ -20,25 +20,25 @@ export interface ContextData {
 
 export interface ContextOptions {
   /** 父级 Context */
-  parent?: Context;
+  parent?: Context<P>;
   /** 模块名称 */
   module?: string;
   /** 参数 */
-  params?: Record<string, unknown>;
+  params?: Record<string, any>;
   /** Context 的根 Span 深度 */
   rootSpanDepth?: number;
 }
 
 export interface Context {
   /** 获取 Context 数据 */
-  get(): Readonly<ContextData>;
+  get(): Readonly<ContextData<P>>;
   
   /** 
    * 创建新的 Context
    * 建议：在调用子函数时使用 fork 以支持并发追踪
    * @param options - 配置选项，可包含 module 和 params
    */
-  forWithParams(options?: Partial<Omit<ContextOptions, 'parent'>>): Context;
+  forWithParams(options?: Partial<Omit<ContextOptions<P>, 'parent'>>): Context<P>;
 
   /**
    * 开始新的 Span，自动将当前 head 作为父级
@@ -49,9 +49,10 @@ export interface Context {
 
   /**
    * 结束当前 head span
+   * @param error - 可选的错误对象
    * @returns 结束的 span
    */
-  endSpan(): Span;
+  endSpan(error?: Error): Span;
 
   /**
    * 获取当前 Context 的 Span 树
@@ -105,7 +106,7 @@ export interface SpanData {
 
 export interface SpanOptions {
   /** 关联的 Context */
-  context: Context;
+  context: Context<any>;
   /** 父 Span */
   parent?: Span;
   /** 操作名称 */

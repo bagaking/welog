@@ -51,6 +51,12 @@ export class ContextImpl implements Context {
     });
   }
 
+  get params(): Record<string, any> {
+    return Object.freeze({
+      ...this._data.params
+    });
+  }
+
   forWithParams(options: Partial<Omit<ContextOptions, 'parent'>> = {}): Context {
     return new ContextImpl({
       parent: this,
@@ -73,7 +79,7 @@ export class ContextImpl implements Context {
     return span;
   }
 
-  endSpan(): Span {
+  endSpan(error?: Error): Span {
     const currentHead = this._data.headSpan;
     const parentId = currentHead.get().parentId;
     
@@ -84,6 +90,10 @@ export class ContextImpl implements Context {
     const parentSpan = this._data.spans.get(parentId);
     if (!parentSpan) {
       throw new Error('Parent span not found');
+    }
+    
+    if (error) {
+      currentHead.recordError(error);
     }
     
     currentHead.end();
