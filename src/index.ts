@@ -1,6 +1,6 @@
 /**
  * @bagaking/welog
- * 一个轻量级但功能完整的 Tracing 系统
+ * 一个小型进程内 tracing/logging kernel
  */
 
 // Core Types

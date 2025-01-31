@@ -1,7 +1,7 @@
 {
   "name": "@bagaking/welog",
   "version": "0.0.6",
-  "description": "A lightweight but full-featured tracing system with context management and integrated logging",
+  "description": "A small in-process tracing/logging kernel for TypeScript ESM projects",
   "type": "module",
   "main": "dist/index.js",
   "module": "dist/index.js",
