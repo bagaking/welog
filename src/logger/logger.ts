@@ -1,6 +1,13 @@
 import type { Logger, LoggerConfig, LogRecord, LoggerMiddleware, Context, Span } from '../types';
 import { LogLevel } from '../types'; 
 
+const LOG_LEVEL_PRIORITY: Record<LogLevel, number> = {
+  [LogLevel.DEBUG]: 10,
+  [LogLevel.INFO]: 20,
+  [LogLevel.WARN]: 30,
+  [LogLevel.ERROR]: 40
+};
+
 export class LoggerImpl implements Logger {
   private readonly middlewares: LoggerMiddleware[];
   private readonly minLevel: LogLevel;
@@ -47,8 +54,12 @@ export class LoggerImpl implements Logger {
     next(record);
   }
 
+  private shouldLog(level: LogLevel): boolean {
+    return LOG_LEVEL_PRIORITY[level] >= LOG_LEVEL_PRIORITY[this.minLevel];
+  }
+
   log(level: LogLevel, message: string, data?: Record<string, unknown>): void {
-    if (level < this.minLevel) return;
+    if (!this.shouldLog(level)) return;
     this.processRecord(this.createRecord(level, message, undefined, data));
   }
 
@@ -65,6 +76,7 @@ export class LoggerImpl implements Logger {
   }
 
   error(message: string, error?: Error, data?: Record<string, unknown>): void {
+    if (!this.shouldLog(LogLevel.ERROR)) return;
     this.processRecord(this.createRecord(LogLevel.ERROR, message, error, data));
   }
 }
@@ -78,4 +90,4 @@ export function createLogger(
   span?: Span
 ): Logger {
   return new LoggerImpl(config, context, span);
-} 
+}
