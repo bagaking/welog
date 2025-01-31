@@ -28,7 +28,7 @@ pnpm add @bagaking/welog
 pnpm install
 npm run type-check
 npm run lint
-npm exec -- vitest run --passWithNoTests
+npm exec -- vitest run
 npm run build
 ```
 
