@@ -35,7 +35,39 @@ try {
   writeFileSync(
     join(tempDir, 'smoke.mjs'),
     `
+      import { createRequire } from 'node:module';
+
+      const require = createRequire(import.meta.url);
       const welog = await import('@bagaking/welog');
+      const expectedExports = [
+        'ConsoleMiddleware',
+        'ContextImpl',
+        'LogLevel',
+        'SpanLogMiddleware',
+        'SpanStatus',
+        'createLogger',
+        'newContext'
+      ];
+      const actualExports = Object.keys(welog).sort();
+
+      if (JSON.stringify(actualExports) !== JSON.stringify(expectedExports)) {
+        throw new Error(\`unexpected root exports: \${actualExports.join(', ')}\`);
+      }
+
+      const packageMetadata = require('@bagaking/welog/package.json');
+      if (packageMetadata.name !== '@bagaking/welog') {
+        throw new Error('package metadata export returned the wrong package');
+      }
+
+      try {
+        await import('@bagaking/welog/src/index.js');
+        throw new Error('private source subpath import unexpectedly succeeded');
+      } catch (error) {
+        if (error?.code !== 'ERR_PACKAGE_PATH_NOT_EXPORTED') {
+          throw error;
+        }
+      }
+
       const ctx = welog.newContext({
         module: 'smoke',
         logger: { middlewares: [] }

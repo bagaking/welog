@@ -250,9 +250,11 @@ executes the package smoke test.
 published to npm. It does not install or execute the packed package.
 
 `npm run pack:smoke` builds the package, creates the real npm tarball, installs
-that tarball into a temporary project, and runs a root import with a minimal
-`Context` and `Logger` flow. Run it before publishing or changing package
-exports, `files`, build output, or public entrypoints.
+that tarball into a temporary project, and checks the published import surface.
+It verifies the root export names, the `@bagaking/welog/package.json` metadata
+export, private subpath blocking, and a minimal `Context` plus `Logger` flow.
+Run it before publishing or changing package exports, `files`, build output, or
+public entrypoints.
 
 ## Release
 
