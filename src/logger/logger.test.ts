@@ -12,10 +12,15 @@ class CaptureMiddleware implements LoggerMiddleware {
 }
 
 describe('LoggerImpl', () => {
-  it('filters records by semantic log level priority', () => {
+  it.each([
+    [LogLevel.DEBUG, [LogLevel.DEBUG, LogLevel.INFO, LogLevel.WARN, LogLevel.ERROR]],
+    [LogLevel.INFO, [LogLevel.INFO, LogLevel.WARN, LogLevel.ERROR]],
+    [LogLevel.WARN, [LogLevel.WARN, LogLevel.ERROR]],
+    [LogLevel.ERROR, [LogLevel.ERROR]]
+  ])('filters records at minLevel %s by semantic log level priority', (minLevel, expectedLevels) => {
     const capture = new CaptureMiddleware();
     const logger = createLogger({
-      minLevel: LogLevel.WARN,
+      minLevel,
       middlewares: [capture]
     });
 
@@ -24,9 +29,6 @@ describe('LoggerImpl', () => {
     logger.warn('warn');
     logger.error('error', new Error('boom'));
 
-    expect(capture.records.map((record) => record.level)).toEqual([
-      LogLevel.WARN,
-      LogLevel.ERROR
-    ]);
+    expect(capture.records.map((record) => record.level)).toEqual(expectedLevels);
   });
 });
