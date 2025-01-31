@@ -238,14 +238,13 @@ pnpm install --frozen-lockfile
 Run the local checks:
 
 ```bash
-npm run type-check
-npm run lint
-npm exec -- vitest run
-npm run build
-npm run pack:smoke
+npm run verify
 git diff --check
 git diff --cached --check
 ```
+
+`npm run verify` matches CI. It type-checks, lints, runs the test suite, and
+executes the package smoke test.
 
 `npm run pack:dry-run` rebuilds the package and prints the files that would be
 published to npm. It does not install or execute the packed package.
