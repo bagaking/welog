@@ -25,14 +25,38 @@ pnpm add @bagaking/welog
 ## Development
 
 ```bash
-pnpm install
+pnpm install --frozen-lockfile
 npm run type-check
 npm run lint
 npm exec -- vitest run
 npm run build
+npm run pack:dry-run
 ```
 
+`npm run pack:dry-run` rebuilds the package and verifies the files that would be
+published to npm. Run it before publishing or changing `package.json` package
+boundaries.
+
 ## 🚀 快速开始
+
+The package is published as ESM. Import the public API from the root package:
+
+```typescript
+import {
+  newContext,
+  ConsoleMiddleware,
+  SpanLogMiddleware,
+  type Context,
+  type LoggerMiddleware,
+  type LogRecord,
+  type SpanNode
+} from '@bagaking/welog';
+```
+
+Supported package entrypoints:
+
+- `@bagaking/welog` for runtime APIs and TypeScript types
+- `@bagaking/welog/package.json` for package metadata
 
 ### 基础使用
 
@@ -55,6 +79,8 @@ span.end();
 ### 子 Context 和并发
 
 ```typescript
+import { type Context } from '@bagaking/welog';
+
 async function subOperation(ctx: Context) {
   // 创建子 Context
   const subCtx = ctx.forWithParams({ module: 'sub' });
@@ -117,7 +143,12 @@ ctx.getLogger().info('User login attempt', { userId: '123' });
 ### 美化终端输出 (Node.js)
 
 ```typescript
-import { newContext, LoggerMiddleware, LogRecord } from '@bagaking/welog';
+import {
+  newContext,
+  SpanLogMiddleware,
+  type LoggerMiddleware,
+  type LogRecord
+} from '@bagaking/welog';
 import chalk from 'chalk';
 
 // 创建美化终端输出的中间件
@@ -165,7 +196,7 @@ const ctx = newContext({
 ### 远程日志中间件
 
 ```typescript
-import { newContext, LoggerMiddleware, LogRecord } from '@bagaking/welog';
+import { newContext, type LoggerMiddleware, type LogRecord } from '@bagaking/welog';
 
 // 创建远程日志中间件
 class RemoteLogMiddleware implements LoggerMiddleware {
@@ -219,7 +250,14 @@ const ctx = newContext({
 ### Web 端 Trace 树可视化
 
 ```typescript
-import { newContext, SpanNode } from '@bagaking/welog';
+import {
+  newContext,
+  SpanLogMiddleware,
+  type Context,
+  type LoggerMiddleware,
+  type LogRecord,
+  type SpanNode
+} from '@bagaking/welog';
 
 // 创建用于可视化的中间件
 class TraceViewerMiddleware implements LoggerMiddleware {
