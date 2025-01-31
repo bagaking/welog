@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 const root = new URL('..', import.meta.url);
 const rootPath = fileURLToPath(root);
 const tempDir = mkdtempSync(join(tmpdir(), 'welog-pack-smoke-'));
+const npmSmokeEnv = { ...process.env, npm_config_dry_run: 'false' };
 let tarballPath;
 
 try {
@@ -14,14 +15,20 @@ try {
 
   const tarball = execFileSync('npm', ['pack', '--json'], {
     cwd: rootPath,
+    env: npmSmokeEnv,
     encoding: 'utf8'
   });
   const [{ filename }] = JSON.parse(tarball);
   tarballPath = join(rootPath, filename);
 
-  execFileSync('npm', ['init', '-y'], { cwd: tempDir, stdio: 'ignore' });
+  execFileSync('npm', ['init', '-y'], {
+    cwd: tempDir,
+    env: npmSmokeEnv,
+    stdio: 'ignore'
+  });
   execFileSync('npm', ['install', '--ignore-scripts', tarballPath], {
     cwd: tempDir,
+    env: npmSmokeEnv,
     stdio: 'inherit'
   });
 

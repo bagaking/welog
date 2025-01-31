@@ -270,7 +270,11 @@ npm run publish:major
 ```
 
 Each helper runs `npm version ...` followed by `npm publish --access public`.
-Use them only after the packed package contract has passed.
+The `prepublishOnly` lifecycle runs `npm run pack:smoke` immediately before the
+publish step, so direct `npm publish` and the helper scripts both execute the
+release boundary check before uploading a package. Run the full development
+check set before invoking a helper because the version bump happens before the
+publish lifecycle starts.
 
 ## Architecture Notes
 
