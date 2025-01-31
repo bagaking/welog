@@ -1,10 +1,15 @@
-# 系统架构设计
+# Architecture Notes
+
+This file records the current implementation shape and older design direction.
+It is not a public API contract and not a roadmap. The supported package
+contract is the README API section plus the TypeScript declarations shipped from
+`dist/types`.
 
 ## 核心概念
 
 ### Context
 - 作为核心容器，管理 Span 树和生命周期
-- 不可变设计，每次修改返回新实例
+- 内部维护当前 head span；外部读取通过接口返回受控数据
 - 支持 fork 子 Context，用于并发场景
 - 维护 traceId 在整个调用链中的一致性
 - 通过 rootSpanDepth 控制 Span 深度
@@ -45,10 +50,10 @@
 
 ## 实现特点
 
-### 不可变性
-- Context 的所有修改都返回新实例
+### 数据访问边界
+- Context 通过方法管理 head span 和子 Context
 - Span 数据的修改通过方法调用
-- 确保并发安全
+- 公开读取结果会复制或冻结关键数据，避免调用方直接改内部状态
 
 ### 树形结构
 - Context 树：通过 parent-child 关系
@@ -57,7 +62,7 @@
 
 ### 日志集成
 - 自动关联 Context 和 Span
-- 支持基于 traceId 的采样
+- SpanLogMiddleware 支持进程内随机采样
 - 灵活的字段选择和格式化
 
 ## 技术实现
@@ -118,54 +123,56 @@
 - 链式处理机制
 - 采样和过滤支持
 
-### 序列化支持
-- Context 和 Span 数据可序列化
-- 支持跨进程传递
-- 支持持久化存储
-- 支持分布式追踪
+### 序列化边界
+- Context 和 Span 的公开数据结构可以被应用层读取并自行序列化
+- 当前包不提供跨进程传递协议
+- 当前包不提供持久化存储
+- 当前包不提供分布式追踪协议或 OpenTelemetry bridge
 
-### 监控集成
-- 提供性能指标收集
-- 支持调用链分析
-- 错误追踪和统计
-- 支持第三方监控系统集成
+### 监控集成边界
+- 当前包提供 in-process context、span 和 middleware hooks
+- 性能指标、调用链分析、错误统计和第三方监控集成需要由应用中间件实现
+- README 的 Production Boundaries 是当前生产使用边界
 
 ## 性能考虑
 
 ### 内存优化
 - 轻量级数据结构
-- 及时清理完成的 Span
+- 调用方应及时结束 Span，避免长生命周期上下文积累过多数据
 - 合理使用采样
 - 避免冗余数据
 
 ### 并发处理
-- 不可变设计确保线程安全
-- 避免锁竞争
-- 支持高并发场景
-- 最小化同步开销
+- fork 可表达子工作分支并复用 traceId
+- 当前实现不提供跨线程同步原语
+- 调用方仍需控制 Context 的生命周期和共享边界
 
 ### 日志性能
-- 异步日志处理
-- 批量写入优化
-- 采样控制
-- 缓冲区管理
+- 中间件接口是同步调用
+- 当前包不提供异步日志 worker
+- 当前包不提供批量写入或缓冲区管理
+- 采样仅由 SpanLogMiddleware 在进程内执行
 
-## 未来规划
+## Historical Design Ideas
 
-### 功能增强
-1. 分布式追踪支持
+The following ideas appeared in earlier architecture drafts. They are not
+implemented in the current package and do not commit the project to a delivery
+timeline.
+
+### 功能方向
+1. 分布式追踪 bridge 候选
 2. 更多内置中间件
 3. 性能分析工具
 4. 可视化支持
 
-### 性能优化
+### 性能方向
 1. 内存池优化
 2. 日志聚合
 3. 索引优化
 4. 压缩算法
 
-### 生态集成
-1. OpenTelemetry 支持
+### 生态方向
+1. OpenTelemetry bridge 候选
 2. 云平台集成
 3. 监控系统集成
 4. 日志分析工具

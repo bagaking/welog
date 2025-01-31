@@ -62,12 +62,15 @@ const ctx = newContext({
 
 ctx.startSpan('create-order', { userId: 'u_1' });
 
+let spanError: Error | undefined;
+
 try {
   ctx.logger.info('order accepted', { orderId: 'ord_1' });
-  ctx.endSpan();
 } catch (error) {
-  ctx.endSpan(error instanceof Error ? error : new Error(String(error)));
+  spanError = error instanceof Error ? error : new Error(String(error));
   throw error;
+} finally {
+  ctx.endSpan(spanError);
 }
 ```
 
@@ -85,12 +88,15 @@ async function chargeCard(ctx: Context) {
 
   paymentCtx.startSpan('charge-card');
 
+  let spanError: Error | undefined;
+
   try {
     paymentCtx.logger.info('charge requested');
-    paymentCtx.endSpan();
   } catch (error) {
-    paymentCtx.endSpan(error instanceof Error ? error : new Error(String(error)));
+    spanError = error instanceof Error ? error : new Error(String(error));
     throw error;
+  } finally {
+    paymentCtx.endSpan(spanError);
   }
 }
 ```
@@ -134,12 +140,18 @@ The package contract in `package.json` is:
 Public root exports:
 
 - Context APIs: `newContext`
+- Current Context implementation class: `ContextImpl`
 - Logger APIs: `createLogger`
 - Middleware classes: `ConsoleMiddleware`, `SpanLogMiddleware`
 - Enums: `LogLevel`, `SpanStatus`
 - Types: `Context`, `ContextData`, `ContextOptions`, `Span`, `SpanData`,
   `SpanOptions`, `SpanNode`, `Logger`, `LoggerConfig`, `LoggerMiddleware`,
   `LoggerMiddlewareConfig`, `LogRecord`
+
+`ContextImpl` is exported by the current root barrel and is the class returned by
+`newContext()`. Treat it as an implementation export, not a stable extension
+contract. Application code should depend on `newContext()` and the `Context`
+interface unless it intentionally accepts constructor and subclassing churn.
 
 ### Context
 
@@ -263,7 +275,8 @@ Use them only after the packed package contract has passed.
 ## Architecture Notes
 
 See [ARCH.md](./ARCH.md) for implementation notes on context trees, span trees,
-logger middleware, and the design history.
+logger middleware, and historical design notes. `ARCH.md` is not a roadmap; the
+API contract and production boundaries in this README remain authoritative.
 
 ## License
 
