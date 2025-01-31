@@ -22,6 +22,16 @@ yarn add @bagaking/welog
 pnpm add @bagaking/welog
 ```
 
+## Development
+
+```bash
+pnpm install
+npm run type-check
+npm run lint
+npm exec -- vitest run --passWithNoTests
+npm run build
+```
+
 ## 🚀 快速开始
 
 ### 基础使用
@@ -353,4 +363,3 @@ const style = `
 ## 📄 许可证
 
 MIT License - 详见 [LICENSE](LICENSE) 文件
- 

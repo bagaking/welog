@@ -1,5 +1,5 @@
 import { generateId } from './utils';
-import type { SpanData, SpanOptions, Span, Context } from '../types';
+import type { SpanData, SpanOptions, Span } from '../types';
 import type { LogRecord } from '../types';
 import { SpanStatus } from '../types';
 
@@ -86,4 +86,4 @@ export class SpanImpl implements Span {
  */
 export function createSpan(options: CreateSpanOptions): Span {
   return new SpanImpl(options);
-} 
+}
