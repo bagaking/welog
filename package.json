@@ -28,6 +28,7 @@
     "lint": "eslint src --ext .ts",
     "type-check": "tsc --noEmit",
     "pack:dry-run": "npm run build && npm pack --dry-run",
+    "pack:smoke": "node scripts/pack-smoke.mjs",
     "prepublishOnly": "pnpm build",
     "publish:patch": "npm version patch && npm publish --access public",
     "publish:minor": "npm version minor && npm publish --access public",

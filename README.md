@@ -30,11 +30,15 @@ npm run type-check
 npm run lint
 npm exec -- vitest run
 npm run build
-npm run pack:dry-run
+npm run pack:smoke
 ```
 
-`npm run pack:dry-run` rebuilds the package and verifies the files that would be
-published to npm. Run it before publishing or changing `package.json` package
+`npm run pack:dry-run` rebuilds the package and shows the files that would be
+published to npm. It does not install or execute the package.
+
+`npm run pack:smoke` builds the package, packs the real npm tarball, installs it
+in a temporary project, and executes a root import plus a minimal Context and
+Logger flow. Run it before publishing or changing `package.json` package
 boundaries.
 
 ## 🚀 快速开始
@@ -70,7 +74,7 @@ const ctx = newContext({ module: 'app' });
 const span = ctx.startSpan('operation');
 
 // 记录日志
-ctx.getLogger().info('Processing...', { data: 'example' });
+ctx.logger.info('Processing...', { data: 'example' });
 
 // 结束操作
 span.end();
@@ -83,12 +87,12 @@ import { type Context } from '@bagaking/welog';
 
 async function subOperation(ctx: Context) {
   // 创建子 Context
-  const subCtx = ctx.forWithParams({ module: 'sub' });
+  const subCtx = ctx.fork({ module: 'sub' });
   
   const span = subCtx.startSpan('sub-operation');
   try {
     // 执行操作...
-    subCtx.getLogger().info('Sub operation running');
+    subCtx.logger.info('Sub operation running');
   } finally {
     span.end();
   }
@@ -126,7 +130,7 @@ const ctx = newContext({
 
 // 使用示例
 const span = ctx.startSpan('user-login');
-ctx.getLogger().info('User login attempt', { userId: '123' });
+ctx.logger.info('User login attempt', { userId: '123' });
 // 输出示例:
 // {
 //   level: 'info',
@@ -377,10 +381,11 @@ const style = `
 
 ### Context API
 - `newContext(options?)`: 创建新的根 Context
-- `context.forWithParams(options?)`: 创建子 Context
+- `context.fork(options?)`: 创建子 Context
 - `context.startSpan(name, attributes?)`: 开始新的操作
 - `context.endSpan()`: 结束当前操作
-- `context.getLogger()`: 获取 Logger 实例
+- `context.params`: 获取 Context 参数
+- `context.logger`: 获取 Logger 实例
 
 ### Span API
 - `span.setAttributes(attributes)`: 设置属性

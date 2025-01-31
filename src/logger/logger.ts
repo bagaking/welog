@@ -1,5 +1,5 @@
-import type { Logger, LoggerConfig, LogRecord, LoggerMiddleware, Context, Span } from '../types';
-import { LogLevel } from '../types'; 
+import type { Logger, LoggerConfig, LogRecord, LoggerMiddleware, Context, Span } from '../types/index.js';
+import { LogLevel } from '../types/index.js';
 
 const LOG_LEVEL_PRIORITY: Record<LogLevel, number> = {
   [LogLevel.DEBUG]: 10,
@@ -44,7 +44,7 @@ export class LoggerImpl implements Logger {
 
   private processRecord(record: LogRecord): void {
     let index = 0;
-    
+
     const next = (record: LogRecord) => {
       if (index < this.middlewares.length) {
         this.middlewares[index++].handle(record, next);

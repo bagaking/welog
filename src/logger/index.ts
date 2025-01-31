@@ -1,2 +1,2 @@
-export { createLogger } from './logger';
-export { SpanLogMiddleware, ConsoleMiddleware } from './middlewares'; 
+export { createLogger } from './logger.js';
+export { SpanLogMiddleware, ConsoleMiddleware } from './middlewares.js';

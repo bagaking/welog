@@ -44,5 +44,5 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Pack dry-run
-        run: npm run pack:dry-run
+      - name: Package smoke
+        run: npm run pack:smoke

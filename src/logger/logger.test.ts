@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { createLogger } from './logger';
-import { LogLevel, type LogRecord, type LoggerMiddleware } from '../types';
+import { createLogger } from './logger.js';
+import { LogLevel, type LogRecord, type LoggerMiddleware } from '../types/index.js';
 
 class CaptureMiddleware implements LoggerMiddleware {
   readonly records: LogRecord[] = [];

@@ -1,4 +1,4 @@
-import type { Context, ContextData } from '../types';
+import type { Context, ContextData } from '../types/index.js';
 
 /**
  * 生成唯一ID
@@ -18,7 +18,7 @@ export function getFullModulePath(
   if (!module) {
     return parent?.get().module || '';
   }
-  
+
   const parentModule = parent?.get().module || '';
   return parentModule ? `${parentModule}.${module}` : module;
 }
@@ -34,7 +34,7 @@ export function createContextData(
   }
 ): Omit<ContextData, 'spans' | 'headSpan'> {
   const { parent, module, params = {}} = options;
-  
+
   return {
     traceId: parent?.get().traceId ?? generateId(),
     parentId: parent?.get().id,
@@ -43,4 +43,4 @@ export function createContextData(
     module: getFullModulePath(parent, module),
     params
   };
-} 
+}

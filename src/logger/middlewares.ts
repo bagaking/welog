@@ -1,5 +1,5 @@
-import type { LoggerMiddleware, LoggerMiddlewareConfig, LogRecord } from '../types';
-import { LogLevel } from '../types';
+import type { LoggerMiddleware, LoggerMiddlewareConfig, LogRecord } from '../types/index.js';
+import { LogLevel } from '../types/index.js';
 
 /**
  * Span 日志中间件
@@ -55,7 +55,7 @@ export class ConsoleMiddleware implements LoggerMiddleware {
       const spanData = record.span.get();
       output.spanId = spanData.id;
       output.spanName = spanData.name;
-      
+
       // 使用 span 的 depth 进行缩进
       output.message = '  '.repeat(spanData.depth) + output.message;
     }
@@ -83,4 +83,4 @@ export class ConsoleMiddleware implements LoggerMiddleware {
 
     next(record);
   }
-} 
+}

@@ -1,7 +1,7 @@
-import { generateId } from './utils';
-import type { SpanData, SpanOptions, Span } from '../types';
-import type { LogRecord } from '../types';
-import { SpanStatus } from '../types';
+import { generateId } from './utils.js';
+import type { SpanData, SpanOptions, Span } from '../types/index.js';
+import type { LogRecord } from '../types/index.js';
+import { SpanStatus } from '../types/index.js';
 
 export interface CreateSpanOptions extends SpanOptions {
   depth: number;
