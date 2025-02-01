@@ -104,4 +104,27 @@ describe('ContextImpl spans', () => {
     expect(childNode?.span.id).toBe(childSpan.get().id);
     expect(childNode?.span.name).toBe('charge-card');
   });
+
+  it('attaches forked context trees only to the span that was current at fork time', () => {
+    const parent = newContext({
+      module: 'orders',
+      logger: silentLogger
+    });
+    const firstSpan = parent.startSpan('first');
+    const child = parent.fork({
+      module: 'payments',
+      logger: silentLogger
+    });
+    child.startSpan('charge-card');
+    parent.endSpan();
+    const secondSpan = parent.startSpan('second');
+
+    const tree = parent.getGlobalSpanTree();
+    const firstNode = tree.children.find(node => node.span.id === firstSpan.get().id);
+    const secondNode = tree.children.find(node => node.span.id === secondSpan.get().id);
+
+    expect(firstNode?.children).toHaveLength(1);
+    expect(firstNode?.children[0]?.contextId).toBe(child.get().id);
+    expect(secondNode?.children).toHaveLength(0);
+  });
 });

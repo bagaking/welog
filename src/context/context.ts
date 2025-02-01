@@ -11,12 +11,14 @@ import { SpanLogMiddleware } from '../logger/middlewares.js';
  */
 export class ContextImpl implements Context {
   private readonly _data: ContextData;
-  private readonly _children: Set<Context>;
+  private readonly _children: Set<ContextImpl>;
   private readonly _logger: Logger;
   private readonly _rootSpanDepth: number;
+  private readonly _parentSpanId?: string;
 
   constructor(options: ContextOptions = {}) {
     this._rootSpanDepth = options.rootSpanDepth ?? 0;
+    this._parentSpanId = options.parent?.get().headSpan.get().id;
     const baseData = createContextData(options);
     const spans = new Map<string, Span>();
 
@@ -164,27 +166,24 @@ export class ContextImpl implements Context {
 
     if (context instanceof ContextImpl) {
       // 递归构建每个子 Context 的树
-      const childTrees = Array.from(context._children).map(child =>
-        this._buildGlobalSpanTree(child)
-      );
-
-      // 将子 Context 的树添加到当前树的叶子节点
-      this._attachChildTrees(localTree, childTrees);
+      Array.from(context._children).forEach(child => {
+        const childTree = this._buildGlobalSpanTree(child);
+        this._attachChildTree(localTree, child._parentSpanId, childTree);
+      });
     }
 
     return localTree;
   }
 
-  private _attachChildTrees(parentTree: SpanNode, childTrees: SpanNode[]): void {
-    // 找到非哨兵的叶子节点
-    if (parentTree.children.length === 0 && !parentTree.span.attributes?.isSentinel) {
-      parentTree.children.push(...childTrees);
-    } else {
-      // 递归处理所有子节点
-      parentTree.children.forEach(child =>
-        this._attachChildTrees(child, childTrees)
-      );
+  private _attachChildTree(parentTree: SpanNode, parentSpanId: string | undefined, childTree: SpanNode): boolean {
+    if (parentTree.span.id === parentSpanId) {
+      parentTree.children.push(childTree);
+      return true;
     }
+
+    return parentTree.children.some(child =>
+      this._attachChildTree(child, parentSpanId, childTree)
+    );
   }
 
   get logger(): Logger {
