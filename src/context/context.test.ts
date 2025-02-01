@@ -69,4 +69,39 @@ describe('ContextImpl spans', () => {
     expect(child.get().headSpan).toBe(childSentinel);
     expect(parent.get().headSpan).toBe(parentSpan);
   });
+
+  it('builds a global span tree across forked contexts from the root context', () => {
+    const parent = newContext({
+      module: 'orders',
+      logger: silentLogger
+    });
+    const parentSpan = parent.startSpan('create-order');
+    const child = parent.fork({
+      module: 'payments',
+      logger: silentLogger
+    });
+    const childSentinel = child.get().headSpan;
+    const childSpan = child.startSpan('charge-card');
+
+    expect(() => child.getGlobalSpanTree()).toThrow(
+      'getGlobalSpanTree should be called on root context'
+    );
+
+    const tree = parent.getGlobalSpanTree();
+    const parentNode = tree.children[0];
+    const childSentinelNode = parentNode?.children[0];
+    const childNode = childSentinelNode?.children[0];
+
+    expect(tree.contextId).toBe(parent.get().id);
+    expect(tree.span.attributes).toMatchObject({ isSentinel: true });
+    expect(parentNode?.contextId).toBe(parent.get().id);
+    expect(parentNode?.span.id).toBe(parentSpan.get().id);
+    expect(parentNode?.span.name).toBe('create-order');
+    expect(childSentinelNode?.contextId).toBe(child.get().id);
+    expect(childSentinelNode?.span.id).toBe(childSentinel.get().id);
+    expect(childSentinelNode?.span.attributes).toMatchObject({ isSentinel: true });
+    expect(childNode?.contextId).toBe(child.get().id);
+    expect(childNode?.span.id).toBe(childSpan.get().id);
+    expect(childNode?.span.name).toBe('charge-card');
+  });
 });
