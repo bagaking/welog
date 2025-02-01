@@ -253,6 +253,7 @@ published to npm. It does not install or execute the packed package.
 that tarball into a temporary project, and checks the published import surface.
 It verifies the root export names, the `@bagaking/welog/package.json` metadata
 export, private subpath blocking, and a minimal `Context` plus `Logger` flow.
+It also compiles an external TypeScript consumer against the packed declarations.
 Run it before publishing or changing package exports, `files`, build output, or
 public entrypoints.
 

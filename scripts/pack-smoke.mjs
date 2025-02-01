@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url';
 
 const root = new URL('..', import.meta.url);
 const rootPath = fileURLToPath(root);
+const tscPath = fileURLToPath(new URL('../node_modules/typescript/bin/tsc', import.meta.url));
 const tempDir = mkdtempSync(join(tmpdir(), 'welog-pack-smoke-'));
 const npmSmokeEnv = { ...process.env, npm_config_dry_run: 'false' };
 let tarballPath;
@@ -30,6 +31,11 @@ try {
     cwd: tempDir,
     env: npmSmokeEnv,
     stdio: 'inherit'
+  });
+  execFileSync('npm', ['pkg', 'set', 'type=module'], {
+    cwd: tempDir,
+    env: npmSmokeEnv,
+    stdio: 'ignore'
   });
 
   writeFileSync(
@@ -86,7 +92,65 @@ try {
     `
   );
 
+  writeFileSync(
+    join(tempDir, 'smoke.ts'),
+    `
+      import {
+        LogLevel,
+        createLogger,
+        newContext,
+        type Context,
+        type LoggerMiddleware,
+        type SpanNode
+      } from '@bagaking/welog';
+
+      const middleware: LoggerMiddleware = {
+        handle(record, next) {
+          if (record.level !== LogLevel.INFO) {
+            throw new Error('unexpected log level');
+          }
+          next(record);
+        }
+      };
+
+      const logger = createLogger({
+        minLevel: LogLevel.INFO,
+        middlewares: [middleware]
+      });
+      const ctx: Context = newContext({
+        module: 'ts-smoke',
+        logger: { minLevel: LogLevel.INFO, middlewares: [middleware] }
+      });
+      const child = ctx.fork({ module: 'child' });
+      const tree: SpanNode = child.getGlobalSpanTree();
+
+      logger.info('type smoke', { span: tree.span.name });
+    `
+  );
+
+  writeFileSync(
+    join(tempDir, 'tsconfig.json'),
+    JSON.stringify(
+      {
+        compilerOptions: {
+          module: 'NodeNext',
+          moduleResolution: 'NodeNext',
+          strict: true,
+          target: 'ES2022',
+          noEmit: true
+        },
+        include: ['smoke.ts']
+      },
+      null,
+      2
+    )
+  );
+
   execFileSync('node', ['smoke.mjs'], { cwd: tempDir, stdio: 'inherit' });
+  execFileSync(process.execPath, [tscPath, '--project', 'tsconfig.json'], {
+    cwd: tempDir,
+    stdio: 'inherit'
+  });
 } finally {
   rmSync(tempDir, { recursive: true, force: true });
   if (tarballPath) {
